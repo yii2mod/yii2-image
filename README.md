@@ -15,6 +15,13 @@ return [
     ]
 ];
 ```
+Example usage
+```php
+Yii::$app->get('image')->thumbOf('imagePath', ['resize' => [
+                                    'width' => 125,
+                                    'height' => 125,
+                                ]
+])
 
 Installation
 ------------
