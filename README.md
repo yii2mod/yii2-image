@@ -23,6 +23,8 @@ Yii::$app->get('image')->thumbOf('imagePath', ['resize' => [
                                 ]
                         ]);
 
+```
+
 Installation
 ------------
 
