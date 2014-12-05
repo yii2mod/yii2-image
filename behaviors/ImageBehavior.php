@@ -23,7 +23,7 @@ class ImageBehavior extends Behavior
      */
     public function url($mode = 'original')
     {
-        $attribute = $this->owner->pathAttribute;
+        $attribute = $this->owner->{$this->pathAttribute};
         return Yii::$app->get('image')->getUrl($attribute, $mode);
     }
 
