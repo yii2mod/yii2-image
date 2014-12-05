@@ -1,4 +1,5 @@
 <?php
+
 namespace yii2mod\image;
 
 use Imagine\Image\Box;
@@ -30,6 +31,11 @@ class ImageComponent extends Component
      * @var string relative path where the cache files are kept
      */
     public $cachePath = '/web/assets/image/';
+
+    /**
+     * @var string relative public path where the cache files are kept
+     */
+    public $cachePublicPath = '/assets/image/';
 
     /**
      * @var int cache lifetime in seconds
@@ -106,9 +112,9 @@ class ImageComponent extends Component
     {
         $filePath = $this->getCachePath($file, $type);
         if (file_exists($filePath['system']) && (time() - filemtime($filePath['system']) < $this->cacheTime)) {
-            return $filePath['web'];
+            return $filePath['public'];
         } else {
-            return Url::toRoute(['site/image', 'path' => urlencode($file), 'type' => $type]);
+            return Url::toRoute(['/site/image', 'path' => urlencode($file), 'type' => $type]);
         }
     }
 
@@ -123,6 +129,7 @@ class ImageComponent extends Component
         $hash = md5($file . $type);
         $cacheFileExt = pathinfo($file, PATHINFO_EXTENSION);
         $cachePath = $this->cachePath . $hash{0} . DIRECTORY_SEPARATOR;
+        $cachePublicPath = $this->cachePublicPath . $hash{0} . DIRECTORY_SEPARATOR;
         $cacheFile = "{$hash}.{$cacheFileExt}";
         $systemPath = Yii::getAlias('@app') . $cachePath;
         if (!is_dir($systemPath)) {
@@ -130,7 +137,8 @@ class ImageComponent extends Component
         }
         return [
             'system' => $systemPath . $cacheFile,
-            'web' => $cachePath . $cacheFile
+            'web' => $cachePath . $cacheFile,
+            'public' => $cachePublicPath. $cacheFile,
         ];
     }
 
