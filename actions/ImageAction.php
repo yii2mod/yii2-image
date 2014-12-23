@@ -24,7 +24,7 @@ class ImageAction extends Action
         try {
             $image->show($path, $type);
         } catch (Exception $e) {
-            $image->renderEmpty();
+    	
         }
     }
 

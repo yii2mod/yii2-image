@@ -3,9 +3,9 @@
 namespace yii2mod\image;
 
 use Imagine\Image\Box;
-use Imagine\Image\Color;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ManipulatorInterface;
+use Imagine\Image\Palette\RGB;
 use Imagine\Image\Point;
 use Yii;
 use yii\base\Component;
@@ -38,6 +38,11 @@ class ImageComponent extends Component
     public $cachePublicPath = '/assets/image/';
 
     /**
+     * @var string system path to original image
+     */
+    private $sourcePath = '/uploads/Image/';
+
+    /**
      * @var int cache lifetime in seconds
      */
     public $cacheTime = 2592000;
@@ -55,13 +60,18 @@ class ImageComponent extends Component
     public $defaultOffsetY = 0;
 
     /**
+     * @var string path to image for no image
+     */
+    public $noImage = '@vendor/yii2mod/yii2-image/assets/no-image.png';
+
+    /**
      * @var array
      */
     public $config = [
         'original' => [],
         'small' => [
             'thumbnail' => [
-                'box' => [100, 100],
+                'box' => [60, 60],
                 'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND
             ]
         ],
@@ -94,7 +104,10 @@ class ImageComponent extends Component
      */
     public function detectPath($file)
     {
-        $fullPath = Yii::getAlias('@app') . $file;
+        if ($file == $this->noImage) {
+            return Yii::getAlias($this->noImage);
+        }
+        $fullPath = $this->getImageSourcePath() . $file;
         if (is_file($fullPath)) {
             return $fullPath;
         }
@@ -110,7 +123,11 @@ class ImageComponent extends Component
      */
     public function getUrl($file, $type)
     {
+        if (!$this->checkPermission($type)) {
+            $file = $this->noImage;
+        }
         $filePath = $this->getCachePath($file, $type);
+
         if (file_exists($filePath['system']) && (time() - filemtime($filePath['system']) < $this->cacheTime)) {
             return $filePath['public'];
         } else {
@@ -138,7 +155,7 @@ class ImageComponent extends Component
         return [
             'system' => $systemPath . $cacheFile,
             'web' => $cachePath . $cacheFile,
-            'public' => $cachePublicPath. $cacheFile,
+            'public' => $cachePublicPath . $cacheFile,
         ];
     }
 
@@ -146,11 +163,14 @@ class ImageComponent extends Component
      * @param $path
      * @param $type
      */
-    public function show($path, $type)
+    public function show($path, $type = self::IMAGE_ORIGINAL)
     {
-        if ($file = $this->detectPath($path)) {
-            $image = Image::getImagine()->open($file)->copy();
-            if (!empty($type) && in_array($type, array_keys($this->config))) {
+        if (!in_array($type, array_keys($this->config))) {
+            $type = self::IMAGE_ORIGINAL;
+        }
+        if ($this->checkPermission($type)) {
+            if ($file = $this->detectPath($path)) {
+                $image = Image::getImagine()->open($file)->copy();
                 foreach ($this->config[$type] as $action => $options) {
                     if (method_exists($this, $action)) {
                         $image = $this->$action($image, $options);
@@ -158,10 +178,10 @@ class ImageComponent extends Component
                 }
                 $cachePath = $this->getCachePath($path, $type);
                 $image->save($cachePath['system']);
-                $image->show(pathinfo($file, PATHINFO_EXTENSION));
+                $image->show(strtolower(pathinfo($file, PATHINFO_EXTENSION)));
             }
         }
-        $this->renderEmpty();
+        $this->show($this->noImage, $type);
     }
 
 
@@ -196,7 +216,9 @@ class ImageComponent extends Component
         $image = $image->thumbnail($box, $mode);
 
         // create empty image to preserve aspect ratio of thumbnail
-        $thumb = Image::getImagine()->create($box, new Color('FFF', 100));
+        $palette = new RGB();
+        $color = $palette->color('#000', 100);
+        $thumb = Image::getImagine()->create($box, $color);
 
         // calculate points
         $size = $image->getSize();
@@ -224,18 +246,38 @@ class ImageComponent extends Component
     private function watermark($image, $options)
     {
         $watermarkFilename = $options['watermarkFilename'];
-        $start = $options['start'];
         $watermark = Image::getImagine()->open(Yii::getAlias($watermarkFilename));
-        $image->paste($watermark, new Point($start[0], $start[1]));
+        $size = $image->getSize();
+        $wSize = $watermark->getSize();
+
+        $bottomRight = new Point($size->getWidth() - $wSize->getWidth(), $size->getHeight() - $wSize->getHeight());
+        $image->paste($watermark, $bottomRight);
+
         return $image;
     }
 
     /**
-     * Renders transparent 1x1 PNG:
+     * @param $type
+     *
+     * @return bool
      */
-    private function renderEmpty()
+    private function checkPermission($type)
     {
-        header('Content-Type: image/png');
-        echo base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAAApJREFUCNdjYAAAAAIAAeIhvDMAAAAASUVORK5CYII=');
+        if (isset($this->config[$type]['visible'])) {
+            $role = $this->config[$type]['visible'];
+            unset($this->config[$type]['visible']);
+            if (!Yii::$app->getUser()->can($role)) {
+                return false;
+            }
+        }
+        return true;
     }
-} 
+
+    /**
+     * @return string
+     */
+    private function getImageSourcePath()
+    {
+        return Yii::getAlias('@app') . $this->sourcePath;
+    }
+}
