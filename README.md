@@ -6,23 +6,55 @@ Provides methods for the dynamic manipulation of images. Various image formats s
 To use this extension, you have to configure the Connection class in your application configuration:
 
 ```php
+//configure component:
 return [
     //....
     'components' => [
         'image' => [
-            'class' => '\yii2mod\yii2-image\ImageComponent'
+            'class' => '\yii2mod\yii2-image\ImageComponent',
         ],
     ]
 ];
-```
-Example usage
-```php
-Yii::$app->get('image')->thumbOf('imagePath', ['resize' => [
-                                    'width' => 125,
-                                    'height' => 125,
-                                ]
-                        ]);
 
+//add behavior to the model 
+public function behaviors()
+    {
+        return [
+            'image' => [
+                'class' => ImageBehavior::className(),
+                'pathAttribute' => 'path'
+            ],
+        ];
+    }
+```
+Usage example:
+```php
+$imageModel->url('home'); // home is the type of photo, depending on type resize/crop/watermark/etc actions will happen
+```
+
+Configuring image types (yii params configuration section should be used):
+```php
+'params' => [
+        .....
+        'image' => [
+            'medium' => [
+                'thumbnail' => [
+                    'box' => [194, 194],
+                    'mode' => 'outbound'
+                ]
+            ],
+            'home' => [
+                'thumbnail' => [
+                    'box' => [640, 480],
+                    'mode' => 'inset'
+                ],
+                'watermark' => [
+                    'watermarkFilename' => '@app/web/images/watermark.png'
+                ],
+
+            ]
+        ]
+    ],
 ```
 
 Installation
