@@ -84,14 +84,12 @@ class ImageComponent extends Component
     ];
 
     /**
-     * Constructor.
-     *
-     * @param string $file
-     * @param string $driver
+     * Init component.
      */
-    public function __construct($file = null, $driver = null)
+    public function init()
     {
         $this->config = ArrayHelper::merge($this->config, isset(Yii::$app->params['image']) ? Yii::$app->params['image'] : []);
+        return parent::init();
     }
 
 
