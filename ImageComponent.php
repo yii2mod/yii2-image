@@ -40,7 +40,7 @@ class ImageComponent extends Component
     /**
      * @var string system path to original image
      */
-    private $sourcePath = '/uploads/Image/';
+    public $sourcePath = '/uploads/Image/';
 
     /**
      * @var int cache lifetime in seconds
