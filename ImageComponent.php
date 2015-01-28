@@ -23,6 +23,10 @@ use yii\imagine\Image;
 class ImageComponent extends Component
 {
     /**
+     * @var use png for cached files for transparency support
+     */
+    const TRANSPARENT_EXTENSION = 'png';
+    /**
      * @var string
      */
     const IMAGE_ORIGINAL = 'original';
@@ -40,7 +44,7 @@ class ImageComponent extends Component
     /**
      * @var string system path to original image
      */
-    public $sourcePath = '/uploads/Image/';
+    private $sourcePath = '/uploads/Image/';
 
     /**
      * @var int cache lifetime in seconds
@@ -84,12 +88,14 @@ class ImageComponent extends Component
     ];
 
     /**
-     * Init component.
+     * Constructor.
+     *
+     * @param string $file
+     * @param string $driver
      */
-    public function init()
+    public function __construct($file = null, $driver = null)
     {
         $this->config = ArrayHelper::merge($this->config, isset(Yii::$app->params['image']) ? Yii::$app->params['image'] : []);
-        return parent::init();
     }
 
 
@@ -124,6 +130,7 @@ class ImageComponent extends Component
         if (!$this->checkPermission($type)) {
             $file = $this->noImage;
         }
+
         $filePath = $this->getCachePath($file, $type);
 
         if (file_exists($filePath['system']) && (time() - filemtime($filePath['system']) < $this->cacheTime)) {
@@ -142,7 +149,8 @@ class ImageComponent extends Component
     private function getCachePath($file, $type)
     {
         $hash = md5($file . $type);
-        $cacheFileExt = pathinfo($file, PATHINFO_EXTENSION);
+        $isTransparent = ArrayHelper::getValue($this->config[$type], 'transparent', false);
+        $cacheFileExt = $isTransparent ? self::TRANSPARENT_EXTENSION : strtolower(pathinfo($file, PATHINFO_EXTENSION));
         $cachePath = $this->cachePath . $hash{0} . DIRECTORY_SEPARATOR;
         $cachePublicPath = $this->cachePublicPath . $hash{0} . DIRECTORY_SEPARATOR;
         $cacheFile = "{$hash}.{$cacheFileExt}";
@@ -154,6 +162,7 @@ class ImageComponent extends Component
             'system' => $systemPath . $cacheFile,
             'web' => $cachePath . $cacheFile,
             'public' => $cachePublicPath . $cacheFile,
+            'extension' => $cacheFileExt
         ];
     }
 
@@ -168,15 +177,20 @@ class ImageComponent extends Component
         }
         if ($this->checkPermission($type)) {
             if ($file = $this->detectPath($path)) {
-                $image = Image::getImagine()->open($file)->copy();
-                foreach ($this->config[$type] as $action => $options) {
+                $image = Image::getImagine()
+                    ->open($file)
+                    ->copy();
+                $actions = $this->config[$type];
+                ArrayHelper::remove($actions, 'transparent');
+                foreach ($actions as $action => $options) {
                     if (method_exists($this, $action)) {
                         $image = $this->$action($image, $options);
                     }
                 }
                 $cachePath = $this->getCachePath($path, $type);
                 $image->save($cachePath['system']);
-                $image->show(strtolower(pathinfo($file, PATHINFO_EXTENSION)));
+                $image->show($cachePath['extension']);
+                exit();
             }
         }
         $this->show($this->noImage, $type);
