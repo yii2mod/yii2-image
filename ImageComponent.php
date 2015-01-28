@@ -195,27 +195,75 @@ class ImageComponent extends Component
     }
 
     /**
-     * @param $image
-     * @param $options
+     * @param        $image
+     * @param        $options
+     * @param string $filter
      *
      * @return ImageInterface
+     * @throws InvalidArgumentException
      */
-    private function thumbnail($image, $options)
+    private function thumbnail($image, $options, $filter = ImageInterface::FILTER_UNDEFINED)
     {
         $width = $options['box'][0];
         $height = $options['box'][1];
+        $size = $box = new Box($width, $height);
         $mode = $options['mode'];
-        $box = new Box($options['box'][0], $options['box'][1]);
 
-        if (($image->getSize()->getWidth() <= $box->getWidth() && $image->getSize()->getHeight() <= $box->getHeight()) || (!$box->getWidth() && !$box->getHeight())) {
-            return $image->copy();
+        if ($mode !== ImageInterface::THUMBNAIL_INSET && $mode !== ImageInterface::THUMBNAIL_OUTBOUND) {
+            throw new InvalidArgumentException('Invalid mode specified');
         }
 
-        $image = $image->thumbnail($box, $mode);
+        $imageSize = $image->getSize();
+        $ratios = array(
+            $size->getWidth() / $imageSize->getWidth(),
+            $size->getHeight() / $imageSize->getHeight()
+        );
+
+        $image->strip();
+
+        // if target width is larger than image width
+        // AND target height is longer than image height
+        if (!$size->contains($imageSize)) {
+            if ($mode === ImageInterface::THUMBNAIL_INSET) {
+                $ratio = min($ratios);
+            } else {
+                $ratio = max($ratios);
+            }
+
+            if ($mode === ImageInterface::THUMBNAIL_OUTBOUND) {
+                if (!$imageSize->contains($size)) {
+                    $size = new Box(
+                        min($imageSize->getWidth(), $size->getWidth()),
+                        min($imageSize->getHeight(), $size->getHeight())
+                    );
+                } else {
+                    $imageSize = $image->getSize()->scale($ratio);
+                    $image->resize($imageSize, $filter);
+                }
+                if ($ratios[0] > $ratios[1]) {
+                    $cropPoint = new Point(0, 0);
+                } else {
+                    $cropPoint = new Point(
+                        max(0, round(($imageSize->getWidth() - $size->getWidth()) / 2)),
+                        max(0, round(($imageSize->getHeight() - $size->getHeight()) / 2))
+                    );
+                }
+
+                $image->crop($cropPoint, $size);
+            } else {
+                if (!$imageSize->contains($size)) {
+                    $imageSize = $imageSize->scale($ratio);
+                    $image->resize($imageSize, $filter);
+                } else {
+                    $imageSize = $image->getSize()->scale($ratio);
+                    $image->resize($imageSize, $filter);
+                }
+            }
+        }
 
         // create empty image to preserve aspect ratio of thumbnail
         $palette = new RGB();
-        $color = $palette->color('#000', 100);
+        $color = $palette->color('#000', 0); //transparent png with imagick
         $thumb = Image::getImagine()->create($box, $color);
 
         // calculate points
