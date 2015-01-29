@@ -44,7 +44,7 @@ class ImageComponent extends Component
     /**
      * @var string system path to original image
      */
-    private $sourcePath = '/uploads/Image/';
+    public $sourcePath = '/uploads/Image/';
 
     /**
      * @var int cache lifetime in seconds
@@ -88,16 +88,13 @@ class ImageComponent extends Component
     ];
 
     /**
-     * Constructor.
-     *
-     * @param string $file
-     * @param string $driver
+     * Init component.
      */
-    public function __construct($file = null, $driver = null)
+    public function init()
     {
         $this->config = ArrayHelper::merge($this->config, isset(Yii::$app->params['image']) ? Yii::$app->params['image'] : []);
+        return parent::init();
     }
-
 
     /**
      * This method detects which (absolute or relative) path is used.
