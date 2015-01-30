@@ -146,7 +146,11 @@ class ImageComponent extends Component
     private function getCachePath($file, $type)
     {
         $hash = md5($file . $type);
-        $isTransparent = ArrayHelper::getValue($this->config[$type], 'transparent', false);
+        if (isset($type) && isset($this->config[$type])) {
+            $isTransparent = ArrayHelper::getValue($this->config[$type], 'transparent', false);
+        } else {
+            $isTransparent = false;
+        }
         $cacheFileExt = $isTransparent ? self::TRANSPARENT_EXTENSION : strtolower(pathinfo($file, PATHINFO_EXTENSION));
         $cachePath = $this->cachePath . $hash{0} . DIRECTORY_SEPARATOR;
         $cachePublicPath = $this->cachePublicPath . $hash{0} . DIRECTORY_SEPARATOR;
