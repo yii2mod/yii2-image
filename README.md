@@ -41,7 +41,8 @@ Configuring image types (yii params configuration section should be used):
                 'thumbnail' => [
                     'box' => [194, 194],
                     'mode' => 'outbound'
-                ]
+                ],
+                'visible' => 'user' //checking role before outputing url
             ],
             'home' => [
                 'thumbnail' => [
