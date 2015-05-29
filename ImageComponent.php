@@ -189,7 +189,9 @@ class ImageComponent extends Component
                     }
                 }
                 $cachePath = $this->getCachePath($path, $type);
-                $image->save($cachePath['system']);
+                if (!file_exists($cachePath['system'])) {
+                    $image->save($cachePath['system']);
+                }
                 $image->show($cachePath['extension']);
                 exit();
             }
