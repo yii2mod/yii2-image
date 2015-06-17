@@ -3,7 +3,7 @@
     "description": "Provides methods for the dynamic manipulation of images. Various image formats such as JPEG, PNG, and GIF can be resized, cropped, rotated.",
     "type": "yii2-extension",
     "keywords": ["yii2", "extension"],
-    "license": "Apache-2.0",
+    "license": "MIT",
     "authors": [
         {
             "name": "Dmitry Semenov",
