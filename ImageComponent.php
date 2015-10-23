@@ -2,6 +2,7 @@
 
 namespace yii2mod\image;
 
+use Imagine\Exception\InvalidArgumentException;
 use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ManipulatorInterface;
@@ -23,7 +24,7 @@ use yii\imagine\Image;
 class ImageComponent extends Component
 {
     /**
-     * @var use png for cached files for transparency support
+     * @var string use png for cached files for transparency support
      */
     const TRANSPARENT_EXTENSION = 'png';
     /**
@@ -93,14 +94,13 @@ class ImageComponent extends Component
     public function init()
     {
         $this->config = ArrayHelper::merge($this->config, isset(Yii::$app->params['image']) ? Yii::$app->params['image'] : []);
-        return parent::init();
+        parent::init();
     }
 
     /**
      * This method detects which (absolute or relative) path is used.
      *
      * @param array $file path
-     *
      * @return string path
      */
     public function detectPath($file)
@@ -117,9 +117,10 @@ class ImageComponent extends Component
 
 
     /**
+     * Get image url
+     *
      * @param $file
      * @param $type
-     *
      * @return $this
      */
     public function getUrl($file, $type)
@@ -138,9 +139,10 @@ class ImageComponent extends Component
     }
 
     /**
+     * Get image cache path
+     *
      * @param $file
      * @param $type
-     *
      * @return array
      */
     private function getCachePath($file, $type)
@@ -168,6 +170,8 @@ class ImageComponent extends Component
     }
 
     /**
+     * Show image
+     *
      * @param $path
      * @param $type
      */
@@ -193,7 +197,7 @@ class ImageComponent extends Component
                     $image->save($cachePath['system']);
                 }
                 $image->show($cachePath['extension']);
-                exit();
+                Yii::$app->end();
             }
         }
         $this->show($this->noImage, $type);
@@ -201,9 +205,10 @@ class ImageComponent extends Component
 
 
     /**
-     * @param $image
-     * @param $options
+     * Crop image
      *
+     * @param $image \Imagine\Imagick\Image
+     * @param $options
      * @return mixed
      */
     private function crop($image, $options)
@@ -212,10 +217,11 @@ class ImageComponent extends Component
     }
 
     /**
-     * @param        $image
-     * @param        $options
-     * @param string $filter
+     * Create thumbnail
      *
+     * @param $image \Imagine\Imagick\Image
+     * @param $options
+     * @param string $filter
      * @return ImageInterface
      * @throws InvalidArgumentException
      */
@@ -301,9 +307,10 @@ class ImageComponent extends Component
     }
 
     /**
-     * @param $image
-     * @param $options
+     * Add watermark
      *
+     * @param $image \Imagine\Imagick\Image
+     * @param $options
      * @return mixed
      */
     private function watermark($image, $options)
@@ -320,8 +327,9 @@ class ImageComponent extends Component
     }
 
     /**
-     * @param $type
+     * Check permission for current user
      *
+     * @param $type
      * @return bool
      */
     private function checkPermission($type)
@@ -337,6 +345,8 @@ class ImageComponent extends Component
     }
 
     /**
+     * Get image source path
+     *
      * @return string
      */
     private function getImageSourcePath()
