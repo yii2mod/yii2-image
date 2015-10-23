@@ -1,8 +1,10 @@
 <?php
+
 namespace yii2mod\image\actions;
 
 use Yii;
 use yii\base\Action;
+use yii\base\Exception;
 
 /**
  * Class ImageAction
@@ -12,9 +14,10 @@ class ImageAction extends Action
 {
 
     /**
+     * Run action
+     *
      * @param $path
      * @param $type
-     *
      * @throws \yii\base\InvalidConfigException
      */
     public function run($path, $type)
@@ -24,9 +27,8 @@ class ImageAction extends Action
         try {
             $image->show($path, $type);
         } catch (Exception $e) {
-    	
+            Yii::error($e->getMessage());
         }
     }
-
 
 }
