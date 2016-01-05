@@ -11,7 +11,7 @@ return [
     //....
     'components' => [
         'image' => [
-            'class' => '\yii2mod\yii2-image\ImageComponent',
+            'class' => 'yii2mod\image\ImageComponent',
         ],
     ]
 ];
