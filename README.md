@@ -26,6 +26,15 @@ public function behaviors()
             ],
         ];
     }
+    
+// add image action to SiteController
+public function actions()
+{
+    return [
+        'image' => 'yii2mod\image\actions\ImageAction'
+    ];
+}
+ 
 ```
 Usage example:
 ```php
