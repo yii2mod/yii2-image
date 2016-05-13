@@ -3,6 +3,30 @@ Yii2 Image Component
 
 Provides methods for the dynamic manipulation of images. Various image formats such as JPEG, PNG, and GIF can be resized, cropped, rotated.
 
+[![Latest Stable Version](https://poser.pugx.org/yii2mod/yii2-image/v/stable)](https://packagist.org/packages/yii2mod/yii2-image) [![Total Downloads](https://poser.pugx.org/yii2mod/yii2-image/downloads)](https://packagist.org/packages/yii2mod/yii2-image) [![License](https://poser.pugx.org/yii2mod/yii2-image/license)](https://packagist.org/packages/yii2mod/yii2-image)
+
+Installation   
+------------
+
+The preferred way to install this extension is through [composer](http://getcomposer.org/download/).
+
+Either run
+
+```
+php composer.phar require --prefer-dist yii2mod/yii2-settings "*"
+```
+
+or add
+
+```json
+"yii2mod/yii2-settings": "*"
+```
+
+to the require section of your composer.json.
+
+Usage
+-----
+
 To use this extension, you have to configure the Connection class in your application configuration:
 
 ```php
