@@ -13,13 +13,13 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```
-php composer.phar require --prefer-dist yii2mod/yii2-settings "*"
+php composer.phar require --prefer-dist yii2mod/yii2-image "*"
 ```
 
 or add
 
 ```json
-"yii2mod/yii2-settings": "*"
+"yii2mod/yii2-image": "*"
 ```
 
 to the require section of your composer.json.
