@@ -11,6 +11,7 @@
         }
     ],
     "require": {
+        "yiisoft/yii2": "*",
         "yiisoft/yii2-imagine": "*"
     },
     "autoload": {
