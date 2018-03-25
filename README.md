@@ -99,14 +99,12 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```
-php composer.phar require imagine/imagine "0.6.2 as 0.5.1"
 php composer.phar require --prefer-dist yii2mod/yii2-image "*"
 ```
 
 or add
 
 ```json
-"imagine/imagine": "0.6.2 as 0.5.1",
 "yii2mod/yii2-image": "*"
 ```
 
