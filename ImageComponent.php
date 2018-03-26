@@ -48,6 +48,11 @@ class ImageComponent extends Component
     public $sourcePath = '/uploads/Image/';
 
     /**
+     * @var string route to yii2mod\image\actions\ImageAction
+     */
+    public $imageAction = '/site/image';
+    
+    /**
      * @var int cache lifetime in seconds
      */
     public $cacheTime = 2592000;
@@ -134,7 +139,7 @@ class ImageComponent extends Component
         if (file_exists($filePath['system']) && (time() - filemtime($filePath['system']) < $this->cacheTime)) {
             return $filePath['public'];
         } else {
-            return Url::toRoute(['/site/image', 'path' => urlencode($file), 'type' => $type]);
+            return Url::toRoute([$this->imageAction, 'path' => urlencode($file), 'type' => $type]);
         }
     }
 
@@ -145,7 +150,7 @@ class ImageComponent extends Component
      * @param $type
      * @return array
      */
-    private function getCachePath($file, $type)
+    protected function getCachePath($file, $type)
     {
         $hash = md5($file . $type);
         if (isset($type) && isset($this->config[$type])) {
@@ -211,7 +216,7 @@ class ImageComponent extends Component
      * @param $options
      * @return mixed
      */
-    private function crop($image, $options)
+    protected function crop($image, $options)
     {
         return $image->crop(new Point($options['point'][0], $options['point'][1]), new Box($options['box'][0], $options['box'][1]));
     }
@@ -225,7 +230,7 @@ class ImageComponent extends Component
      * @return ImageInterface
      * @throws InvalidArgumentException
      */
-    private function thumbnail($image, $options, $filter = ImageInterface::FILTER_UNDEFINED)
+    protected function thumbnail($image, $options, $filter = ImageInterface::FILTER_UNDEFINED)
     {
         $width = $options['box'][0];
         $height = $options['box'][1];
@@ -313,7 +318,7 @@ class ImageComponent extends Component
      * @param $options
      * @return mixed
      */
-    private function watermark($image, $options)
+    protected function watermark($image, $options)
     {
         $watermarkFilename = $options['watermarkFilename'];
         $watermark = Image::getImagine()->open(Yii::getAlias($watermarkFilename));
@@ -332,7 +337,7 @@ class ImageComponent extends Component
      * @param $type
      * @return bool
      */
-    private function checkPermission($type)
+    protected function checkPermission($type)
     {
         if (isset($this->config[$type]['visible'])) {
             $role = $this->config[$type]['visible'];
@@ -349,7 +354,7 @@ class ImageComponent extends Component
      *
      * @return string
      */
-    private function getImageSourcePath()
+    protected function getImageSourcePath()
     {
         return Yii::getAlias('@app') . $this->sourcePath;
     }
