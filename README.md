@@ -1,5 +1,10 @@
-Yii2 Image Component
-==========
+<p align="center">
+    <a href="https://github.com/yiisoft" target="_blank">
+        <img src="https://avatars0.githubusercontent.com/u/993323" height="100px">
+    </a>
+    <h1 align="center">Yii2 Image Extension</h1>
+    <br>
+</p>
 
 Provides methods for the dynamic manipulation of images. Various image formats such as JPEG, PNG, and GIF can be resized, cropped, rotated.
 
@@ -18,94 +23,83 @@ php composer.phar require --prefer-dist yii2mod/yii2-image "*"
 
 or add
 
-```json
+```
 "yii2mod/yii2-image": "*"
 ```
 
 to the require section of your composer.json.
 
-Usage
------
+Configuration
+-------------
 
-To use this extension, you have to configure the Connection class in your application configuration:
+**Component Setup**
 
+To use the Image Component, you need to configure the components array in your application configuration:
 ```php
-//configure component:
-return [
-    //....
-    'components' => [
-        'image' => [
-            'class' => 'yii2mod\image\ImageComponent',
-        ],
-    ]
-];
+'components' => [
+    'image' => [
+        'class' => 'yii2mod\image\ImageComponent',
+    ],
+],
+```
 
-//add behavior to the model 
+**Attach the behavior to the model**
+
+You need to add the `ImageBehavior` to the your model.
+```php
 public function behaviors()
-    {
-        return [
-            'image' => [
-                'class' => ImageBehavior::className(),
-                'pathAttribute' => 'path'
-            ],
-        ];
-    }
-    
-// add image action to SiteController
+{
+    return [
+        'image' => [
+            'class' => ImageBehavior::class,
+            'pathAttribute' => 'path',
+        ],
+    ];
+}
+```
+
+**Action Setup**
+
+You need to add the `ImageAction` to the your controller.
+```php
 public function actions()
 {
     return [
         'image' => 'yii2mod\image\actions\ImageAction'
     ];
 }
- 
-```
-Usage example:
-```php
-$imageModel->url('home'); // home is the type of photo, depending on type resize/crop/watermark/etc actions will happen
 ```
 
-Configuring image types (yii params configuration section should be used):
+**Configuring image types**
+
+Next, you should configure your params section in your configuration file:
 ```php
 'params' => [
-        .....
-        'image' => [
-            'medium' => [
-                'thumbnail' => [
-                    'box' => [194, 194],
-                    'mode' => 'outbound'
-                ],
-                'visible' => 'user' //checking role before outputing url
+    'image' => [
+        'medium' => [
+            'thumbnail' => [
+                'box' => [194, 194],
+                'mode' => 'outbound'
             ],
-            'home' => [
-                'thumbnail' => [
-                    'box' => [640, 480],
-                    'mode' => 'inset'
-                ],
-                'watermark' => [
-                    'watermarkFilename' => '@app/web/images/watermark.png'
-                ],
-
-            ]
-        ]
+            'visible' => 'user', //checking role before outputing url
+        ],
+        'home' => [
+            'thumbnail' => [
+                'box' => [640, 480],
+                'mode' => 'inset',
+            ],
+            'watermark' => [
+                'watermarkFilename' => '@app/web/images/watermark.png',
+            ],
+        ],
     ],
+],
 ```
 
-Installation
-------------
+Usage:
+------
 
-The preferred way to install this extension is through [composer](http://getcomposer.org/download/).
-
-Either run
-
+```php
+$model = Model::find()->one();
+echo $model->url('medium'); // home is the type of photo.
 ```
-php composer.phar require --prefer-dist yii2mod/yii2-image "*"
-```
-
-or add
-
-```json
-"yii2mod/yii2-image": "*"
-```
-
-to the require section of your composer.json.

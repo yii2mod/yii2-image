@@ -8,20 +8,41 @@ use yii\base\Exception;
 
 /**
  * Class ImageAction
+ *
  * @package yii2mod\image\actions
  */
 class ImageAction extends Action
 {
-
     /**
      * Run action
      *
      * @param $path
      * @param $type
-     * @throws \yii\base\InvalidConfigException
      */
     public function run($path, $type)
     {
+        $test = [
+            'params' => [
+                'image' => [
+                    'medium' => [
+                        'thumbnail' => [
+                            'box' => [194, 194],
+                            'mode' => 'outbound'
+                        ],
+                        'visible' => 'user', //checking role before outputing url
+                    ],
+                    'home' => [
+                        'thumbnail' => [
+                            'box' => [640, 480],
+                            'mode' => 'inset',
+                        ],
+                        'watermark' => [
+                            'watermarkFilename' => '@app/web/images/watermark.png',
+                        ],
+                    ],
+                ],
+            ],
+        ];
         $path = urldecode($path);
         $image = Yii::$app->get('image');
         try {
@@ -30,5 +51,4 @@ class ImageAction extends Action
             Yii::error($e->getMessage());
         }
     }
-
 }

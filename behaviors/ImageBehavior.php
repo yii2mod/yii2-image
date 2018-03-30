@@ -1,4 +1,5 @@
 <?php
+
 namespace yii2mod\image\behaviors;
 
 use Yii;
@@ -6,6 +7,7 @@ use yii\base\Behavior;
 
 /**
  * Class ImageBehavior
+ *
  * @package yii2mod\image\behaviors
  */
 class ImageBehavior extends Behavior
@@ -26,19 +28,20 @@ class ImageBehavior extends Behavior
     private $_methods = [];
 
     /**
-     * @attaching method to behavior
+     * @inheritdoc
      */
     public function init()
     {
         $this->attachMethod($this->methodName, function ($mode = 'original') {
             $attribute = $this->owner->{$this->pathAttribute};
+
             return Yii::$app->get('image')->getUrl($attribute, $mode);
         });
     }
 
     /**
      * @param string $name
-     * @param array  $parameters
+     * @param array $parameters
      *
      * @return mixed
      */
@@ -47,6 +50,7 @@ class ImageBehavior extends Behavior
         if (isset($this->_methods[$name])) {
             return call_user_func_array($this->_methods[$name], $parameters);
         }
+
         return parent::__call($name, $parameters);
     }
 
@@ -60,6 +64,7 @@ class ImageBehavior extends Behavior
         if ($name === $this->methodName) {
             return is_callable([$this, $name]);
         }
+
         return parent::hasMethod($name);
     }
 
@@ -71,6 +76,4 @@ class ImageBehavior extends Behavior
     {
         $this->_methods[$name] = \Closure::bind($closure, $this);
     }
-
-
 }

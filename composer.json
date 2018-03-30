@@ -2,17 +2,29 @@
     "name": "yii2mod/yii2-image",
     "description": "Provides methods for the dynamic manipulation of images. Various image formats such as JPEG, PNG, and GIF can be resized, cropped, rotated.",
     "type": "yii2-extension",
-    "keywords": ["yii2", "extension"],
+    "keywords": [
+        "yii2",
+        "extension"
+    ],
     "license": "MIT",
     "authors": [
         {
             "name": "Dmitry Semenov",
             "email": "disemx@gmail.com"
+        },
+        {
+            "name": "Igor Chepurnoi",
+            "email": "chepurnoi.igor@gmail.com"
         }
     ],
     "require": {
-        "yiisoft/yii2": "*",
+        "php": ">=7.0.0",
+        "yiisoft/yii2": "~2.0.14",
         "yiisoft/yii2-imagine": "*"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "~2.0",
+        "phpunit/phpunit": "~7.0"
     },
     "autoload": {
         "psr-4": {

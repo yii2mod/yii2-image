@@ -17,8 +17,7 @@ use yii\imagine\Image;
 
 /**
  * Class Image
- * Database representation for image path:
- * /uploads/folder/imagename.jpg
+ *
  * @package yii2mod\image
  */
 class ImageComponent extends Component
@@ -27,6 +26,7 @@ class ImageComponent extends Component
      * @var string use png for cached files for transparency support
      */
     const TRANSPARENT_EXTENSION = 'png';
+
     /**
      * @var string
      */
@@ -51,7 +51,7 @@ class ImageComponent extends Component
      * @var string route to yii2mod\image\actions\ImageAction
      */
     public $imageAction = '/site/image';
-    
+
     /**
      * @var int cache lifetime in seconds
      */
@@ -59,12 +59,14 @@ class ImageComponent extends Component
 
     /**
      * Default offset for x coordinate
+     *
      * @var
      */
     public $defaultOffsetX = 0;
 
     /**
      * Default offset for y coordinate
+     *
      * @var
      */
     public $defaultOffsetY = 0;
@@ -82,23 +84,24 @@ class ImageComponent extends Component
         'small' => [
             'thumbnail' => [
                 'box' => [60, 60],
-                'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND
-            ]
+                'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND,
+            ],
         ],
         'medium' => [
             'thumbnail' => [
                 'box' => [240, 240],
-                'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND
-            ]
+                'mode' => ManipulatorInterface::THUMBNAIL_OUTBOUND,
+            ],
         ],
     ];
 
     /**
-     * Init component.
+     * @inheritdoc
      */
     public function init()
     {
-        $this->config = ArrayHelper::merge($this->config, isset(Yii::$app->params['image']) ? Yii::$app->params['image'] : []);
+        $this->config = ArrayHelper::merge($this->config, Yii::$app->params['image'] ?? []);
+
         parent::init();
     }
 
@@ -106,29 +109,33 @@ class ImageComponent extends Component
      * This method detects which (absolute or relative) path is used.
      *
      * @param array $file path
+     *
      * @return string path
      */
-    public function detectPath($file)
+    public function detectPath($file): string
     {
         if ($file == $this->noImage) {
             return Yii::getAlias($this->noImage);
         }
+
         $fullPath = $this->getImageSourcePath() . $file;
+
         if (is_file($fullPath)) {
             return $fullPath;
         }
+
         return false;
     }
-
 
     /**
      * Get image url
      *
      * @param $file
      * @param $type
-     * @return $this
+     *
+     * @return string
      */
-    public function getUrl($file, $type)
+    public function getUrl($file, $type): string
     {
         if (!$this->checkPermission($type)) {
             $file = $this->noImage;
@@ -138,9 +145,9 @@ class ImageComponent extends Component
 
         if (file_exists($filePath['system']) && (time() - filemtime($filePath['system']) < $this->cacheTime)) {
             return $filePath['public'];
-        } else {
-            return Url::toRoute([$this->imageAction, 'path' => urlencode($file), 'type' => $type]);
         }
+
+        return Url::toRoute([$this->imageAction, 'path' => urlencode($file), 'type' => $type]);
     }
 
     /**
@@ -148,29 +155,31 @@ class ImageComponent extends Component
      *
      * @param $file
      * @param $type
+     *
      * @return array
      */
-    protected function getCachePath($file, $type)
+    protected function getCachePath($file, $type): array
     {
         $hash = md5($file . $type);
-        if (isset($type) && isset($this->config[$type])) {
+        if (isset($this->config[$type])) {
             $isTransparent = ArrayHelper::getValue($this->config[$type], 'transparent', false);
         } else {
             $isTransparent = false;
         }
+
         $cacheFileExt = $isTransparent ? self::TRANSPARENT_EXTENSION : strtolower(pathinfo($file, PATHINFO_EXTENSION));
-        $cachePath = $this->cachePath . $hash{0} . DIRECTORY_SEPARATOR;
-        $cachePublicPath = $this->cachePublicPath . $hash{0} . DIRECTORY_SEPARATOR;
+        $cachePath = $this->cachePath . $hash[0] . DIRECTORY_SEPARATOR;
+        $cachePublicPath = $this->cachePublicPath . $hash[0] . DIRECTORY_SEPARATOR;
         $cacheFile = "{$hash}.{$cacheFileExt}";
         $systemPath = Yii::getAlias('@app') . $cachePath;
-        if (!is_dir($systemPath)) {
-            FileHelper::createDirectory($systemPath);
-        }
+
+        FileHelper::createDirectory($systemPath);
+
         return [
             'system' => $systemPath . $cacheFile,
             'web' => $cachePath . $cacheFile,
             'public' => $cachePublicPath . $cacheFile,
-            'extension' => $cacheFileExt
+            'extension' => $cacheFileExt,
         ];
     }
 
@@ -182,9 +191,10 @@ class ImageComponent extends Component
      */
     public function show($path, $type = self::IMAGE_ORIGINAL)
     {
-        if (!in_array($type, array_keys($this->config))) {
+        if (!array_key_exists($type, $this->config)) {
             $type = self::IMAGE_ORIGINAL;
         }
+
         if ($this->checkPermission($type)) {
             if ($file = $this->detectPath($path)) {
                 $image = Image::getImagine()
@@ -205,15 +215,16 @@ class ImageComponent extends Component
                 Yii::$app->end();
             }
         }
+
         $this->show($this->noImage, $type);
     }
-
 
     /**
      * Crop image
      *
      * @param $image \Imagine\Imagick\Image
      * @param $options
+     *
      * @return mixed
      */
     protected function crop($image, $options)
@@ -227,7 +238,9 @@ class ImageComponent extends Component
      * @param $image \Imagine\Imagick\Image
      * @param $options
      * @param string $filter
+     *
      * @return ImageInterface
+     *
      * @throws InvalidArgumentException
      */
     protected function thumbnail($image, $options, $filter = ImageInterface::FILTER_UNDEFINED)
@@ -242,10 +255,10 @@ class ImageComponent extends Component
         }
 
         $imageSize = $image->getSize();
-        $ratios = array(
+        $ratios = [
             $size->getWidth() / $imageSize->getWidth(),
-            $size->getHeight() / $imageSize->getHeight()
-        );
+            $size->getHeight() / $imageSize->getHeight(),
+        ];
 
         $image->strip();
 
@@ -316,6 +329,7 @@ class ImageComponent extends Component
      *
      * @param $image \Imagine\Imagick\Image
      * @param $options
+     *
      * @return mixed
      */
     protected function watermark($image, $options)
@@ -335,6 +349,7 @@ class ImageComponent extends Component
      * Check permission for current user
      *
      * @param $type
+     *
      * @return bool
      */
     protected function checkPermission($type)
@@ -346,6 +361,7 @@ class ImageComponent extends Component
                 return false;
             }
         }
+
         return true;
     }
 
