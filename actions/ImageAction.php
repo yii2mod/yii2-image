@@ -8,17 +8,16 @@ use yii\base\Exception;
 
 /**
  * Class ImageAction
+ *
  * @package yii2mod\image\actions
  */
 class ImageAction extends Action
 {
-
     /**
      * Run action
      *
      * @param $path
      * @param $type
-     * @throws \yii\base\InvalidConfigException
      */
     public function run($path, $type)
     {
@@ -30,5 +29,4 @@ class ImageAction extends Action
             Yii::error($e->getMessage());
         }
     }
-
 }
