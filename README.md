@@ -44,6 +44,8 @@ To use the Image Component, you need to configure the components array in your a
 ```
 
 **Attach the behavior to the model**
+
+You need to add the `ImageBehavior` to the your model.
 ```php
 public function behaviors()
 {
@@ -57,6 +59,8 @@ public function behaviors()
 ```
 
 **Action Setup**
+
+You need to add the `ImageAction` to the your controller.
 ```php
 public function actions()
 {
@@ -66,33 +70,36 @@ public function actions()
 }
 ```
 
+**Configuring image types**
+
+Next, you should configure your params section in your configuration file:
+```php
+'params' => [
+    'image' => [
+        'medium' => [
+            'thumbnail' => [
+                'box' => [194, 194],
+                'mode' => 'outbound'
+            ],
+            'visible' => 'user', //checking role before outputing url
+        ],
+        'home' => [
+            'thumbnail' => [
+                'box' => [640, 480],
+                'mode' => 'inset',
+            ],
+            'watermark' => [
+                'watermarkFilename' => '@app/web/images/watermark.png',
+            ],
+        ],
+    ],
+],
+```
+
 Usage:
 ------
 
 ```php
-$imageModel->url('home'); // home is the type of photo, depending on type resize|crop|watermark| actions will happen.
-```
-
-Configuring image types (yii params configuration section should be used):
-```php
-'params' => [
-        'image' => [
-            'medium' => [
-                'thumbnail' => [
-                    'box' => [194, 194],
-                    'mode' => 'outbound'
-                ],
-                'visible' => 'user', //checking role before outputing url
-            ],
-            'home' => [
-                'thumbnail' => [
-                    'box' => [640, 480],
-                    'mode' => 'inset',
-                ],
-                'watermark' => [
-                    'watermarkFilename' => '@app/web/images/watermark.png',
-                ],
-            ],
-        ],
-    ],
+$model = Model::find()->one();
+echo $model->url('medium'); // home is the type of photo.
 ```
