@@ -56,6 +56,11 @@ class ImageComponent extends Component
      * @var int cache lifetime in seconds
      */
     public $cacheTime = 2592000;
+    
+    /**
+     * @var boolean if true then image action redirects to a cached processed image 
+     */
+    public $redirectWhenCached = false;
 
     /**
      * Default offset for x coordinate
@@ -143,7 +148,7 @@ class ImageComponent extends Component
 
         $filePath = $this->getCachePath($file, $type);
 
-        if (file_exists($filePath['system']) && (time() - filemtime($filePath['system']) < $this->cacheTime)) {
+        if ($this->isFreshCache($filePath['system'])) {
             return $filePath['public'];
         }
 
@@ -197,6 +202,10 @@ class ImageComponent extends Component
 
         if ($this->checkPermission($type)) {
             if ($file = $this->detectPath($path)) {
+                $cachePath = $this->getCachePath($path, $type);
+                if ($this->redirectWhenCached && $this->isFreshCache($cachePath['system'])) {
+                    return Yii::$app->response->redirect($cachePath['public']);
+                }
                 $image = Image::getImagine()
                     ->open($file)
                     ->copy();
@@ -207,8 +216,7 @@ class ImageComponent extends Component
                         $image = $this->$action($image, $options);
                     }
                 }
-                $cachePath = $this->getCachePath($path, $type);
-                if (!file_exists($cachePath['system'])) {
+                if (!$this->isFreshCache($cachePath['system'])) {
                     $image->save($cachePath['system']);
                 }
                 $image->show($cachePath['extension']);
@@ -373,5 +381,16 @@ class ImageComponent extends Component
     protected function getImageSourcePath()
     {
         return Yii::getAlias('@app') . $this->sourcePath;
+    }
+    
+    /**
+     * Checks if cached file actual
+     * 
+     * @param string $filePath
+     * @return boolean
+     */
+    protected function isFreshCache($filePath)
+    {
+        return file_exists($filePath) && (time() - filemtime($filePath) < $this->cacheTime);
     }
 }
